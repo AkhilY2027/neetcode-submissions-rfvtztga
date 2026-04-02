@@ -1,0 +1,45 @@
+class Solution {
+    public boolean validTree(int n, int[][] edges) {
+        // Valid Tree:
+            // 1. Every node is connected
+            // 2. There are no cycles
+        
+        if (edges.length != n - 1) return false; // Can have no more edges than this
+            // By knowing there are only n-1 edges, there is only one case where tree isn't valid
+            // When there is a node disconnected, and thus a cycle within current tree
+            // So need to check if every node is connected
+
+        // Build an adjacency list
+        HashMap<Integer, List<Integer>> adjList = new HashMap<>();
+        for (int i = 0; i < n; i++) {
+            adjList.put(i, new ArrayList<>());
+        }
+        for (int k = 0; k < edges.length; k++) {
+            if (edges[k][0] < 0 || edges[k][0] >= n) return false;
+            if (edges[k][1] < 0 || edges[k][1] >= n) return false;
+            adjList.get(edges[k][0]).add(edges[k][1]);
+            adjList.get(edges[k][1]).add(edges[k][0]);
+        }
+        
+        // Easy Sol: Do a bfs to check if every node is connected
+            // At each point, just check for cycles – However, keep track of parent node for each child node so we know if a neighbor is its parent rather than a cycle
+        Queue<Pair<Integer, Integer>> bfs = new LinkedList<>(); // Child, Parent
+        HashSet<Integer> visited = new HashSet<>();
+        bfs.add(new Pair<>(0, -1));
+        while(!bfs.isEmpty()) {
+            Pair<Integer, Integer> curPair = bfs.poll();
+            int cur = curPair.getKey();
+            int par = curPair.getValue();
+            if (visited.contains(cur)) return false;
+            visited.add(cur);
+
+            for (int neighbor : adjList.get(cur)) {
+                if (neighbor != par) bfs.add(new Pair<>(neighbor, cur));
+            }
+        }
+
+        return visited.size() == n; // Need to check if we reached every node
+        
+        // Union find would also be great for this
+    }
+}
